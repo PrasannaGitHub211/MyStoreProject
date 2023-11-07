@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite parallel="tests" name="Failed suite [Cross_Browser]" guice-stage="DEVELOPMENT">
+  <test thread-count="5" parallel="tests" name="Chrome_Test(failed)">
+    <parameter name="browser" value="Chrome"/>
+    <classes>
+      <class name="com.mystore.testcases.MyAccountPageTest">
+        <methods>
+          <include name="beforSuite"/>
+          <include name="loadConfig"/>
+          <include name="tearDown"/>
+          <include name="validationOfMyAcntPage"/>
+          <include name="setup"/>
+        </methods>
+      </class> <!-- com.mystore.testcases.MyAccountPageTest -->
+    </classes>
+  </test> <!-- Chrome_Test(failed) -->
+  <test thread-count="5" parallel="tests" name="Firefox_Test(failed)">
+    <parameter name="browser" value="Firefox"/>
+    <classes>
+      <class name="com.mystore.testcases.MyAccountPageTest">
+        <methods>
+          <include name="beforSuite"/>
+          <include name="loadConfig"/>
+          <include name="tearDown"/>
+          <include name="validationOfMyAcntPage"/>
+          <include name="setup"/>
+        </methods>
+      </class> <!-- com.mystore.testcases.MyAccountPageTest -->
+    </classes>
+  </test> <!-- Firefox_Test(failed) -->
+  <test thread-count="5" parallel="tests" name="Ie_Test(failed)">
+    <parameter name="browser" value="IE"/>
+    <classes>
+      <class name="com.mystore.testcases.MyAccountPageTest">
+        <methods>
+          <include name="beforSuite"/>
+          <include name="loadConfig"/>
+          <include name="tearDown"/>
+          <include name="validationOfMyAcntPage"/>
+          <include name="setup"/>
+        </methods>
+      </class> <!-- com.mystore.testcases.MyAccountPageTest -->
+    </classes>
+  </test> <!-- Ie_Test(failed) -->
+</suite> <!-- Failed suite [Cross_Browser] -->

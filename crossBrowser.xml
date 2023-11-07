@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Cross_Browser" parallel='tests'>
+  <test  name="Chrome_Test">
+	  <parameter name="browser" value="Chrome"></parameter>
+	   
+	    <classes>   
+	      <class name="com.mystore.testcases.MyAccountPageTest"/>
+	    </classes>
+  </test> <!-- Test -->
+  
+   <test  name="Firefox_Test">
+	  <parameter name="browser" value="Firefox"></parameter>
+	   
+	    <classes>   
+	      <class name="com.mystore.testcases.MyAccountPageTest"/>
+	    </classes>
+  </test> <!-- Test -->
+  
+  
+   <test  name="Ie_Test">
+	  <parameter name="browser" value="IE"></parameter>
+	   
+	    <classes>   
+	      <class name="com.mystore.testcases.MyAccountPageTest"/>
+	    </classes>
+  </test> <!-- Test -->
+  
+  
+</suite> <!-- Suite -->

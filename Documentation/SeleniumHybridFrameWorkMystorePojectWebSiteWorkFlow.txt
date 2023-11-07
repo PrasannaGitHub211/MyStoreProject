@@ -1,0 +1,16 @@
+								IndexPage
+								   |
+								Search results Page< --------------------------------------------------------------- -----------	
+								   | 											       |
+								Add to Cart Page									       |
+								   |							   Create Account Page----             |
+								Shopping Cart Page						   ^             |             |
+								   |								   |             |darrow       |
+								Shipping Page ----->Login option and Forgot My Password Page<-->LoginPage->My Account Page-----
+								  |
+								Review and Payment Page
+									|
+								Order Confirmation Page
+								    |
+								Index page  or Home Page(If we logged in)
+

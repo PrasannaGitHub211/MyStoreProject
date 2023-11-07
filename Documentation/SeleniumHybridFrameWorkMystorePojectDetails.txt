@@ -1,0 +1,450 @@
+*To create Maven project click on File->new->Project->maven->maven project->next->create simple project->GroupId->ArtifactId->Finish
+
+*While creating packeges in java selenium framework inside src/main/java naming convention should be like this->com.mystore(PojectName).actiondriver. It will contain action class means this class contain reusable action methods.
+
+*Inside src/main/java we will create com.mystore.base inside we will create Base class it will contain setup of Selenium.
+
+*Inside src/main/java We will create com.mystore.pageobjects it will contain different classes for each page to store web elements.
+
+*Inside src/test/java folder we will have only test scripts package like-> com.mystore.testcases --> in this test case class name should always end with "test" keyWord example:IndexPageTest.java 
+
+
+*inside src/test/resources we will have "testdata" folder where we will keep excell sheet.
+
+*we need one configuration folder like "Configuration"at project level.In this we will create "config.properties" file it will contain constant iformation like url,username,password,browser
+
+*We need one screen shot folder like "Screen shot" at project level.
+
+*we need one logo folder to keep our application logo like "logo" at project level.
+
+*we need to understand the flow from one page to another page of website.  we need to write it that so according that flow we can create test cases or scripts.
+
+*We need to update POM.xml file means we need to add necessary dependecies  for our projects.These are dependences needed for our hybrid automation  framework          ->testng,selenium-java,poi,poi-ooxml,extentreports,commons-io,log4j-core,webdrivermanager.
+  And in POM.xml file we need following plugins->maven-compiler-plugin,maven-release-plugin,exec-maven-plugin,maven-surefire-plugin,testng.xml
+
+
+*If project contains errors we need to update that projects by right clicking on it.  maven->update project.
+
+*In TestScript which is written using TestNg will be executed in alphabetic order in case if we have not given the priority.
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+*Declaring  Thread Local for parallella execution in BaseClass
+   	public static ThreadLocal<RemoteWebDriver> driver = new ThreadLocal<>();
+
+	public static WebDriver getDriver()
+	{
+		//Get driver from thread local map
+		return driver.get();
+	}
+
+  and   
+	comment that previous -->   	public static WebDriver driver;
+
+  and comment that old launchApp method in BaseClass and write new launchApp() method as follows for parallel execution launchApp method
+	
+	
+	public static void launchApp()
+	{
+		String browserName = prop.getProperty("browser");
+		if(browserName.equalsIgnoreCase("Chrome"))
+		{
+			WebDriverManager.chromedriver().setup();
+			driver.set(new ChromeDriver());
+		}
+		else if(browserName.equalsIgnoreCase("FireFox"))
+		{
+			WebDriverManager.firefoxdriver().setup();
+			driver.set(new FirefoxDriver());
+		}
+		else if(browserName.equalsIgnoreCase("IE"))
+		{
+			WebDriverManager.iedriver().setup();
+			driver.set(new InternetExplorerDriver());
+		}
+		getDriver().manage().window().maximize();
+		Action action = new Action();
+		action.implicitWait(getDriver(), 10);
+		action.pageLoadTimeOut(getDriver(), 30);
+		getDriver().get(prop.getProperty("url"));
+	}
+
+  and in every page object and testcase class replace driver with  getDriver() everywhere.
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+*Steps for Log4J
+=================
+->Add Log4J.xml file in project directory
+
+ 				<!DOCTYPE log4j:configuration PUBLIC
+			  	"-//APACHE//DTD LOG4J 1.2//EN" "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd"> 
+
+				<log4j:configuration debug="true"  
+				    xmlns:log4j='http://jakarta.apache.org/log4j/'>
+ 				<appender name="console" class="org.apache.log4j.ConsoleAppender">
+				    <param name="Target" value="System.out"/>
+				    <layout class="org.apache.log4j.PatternLayout">
+  				  <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+   				 	</layout>
+				  </appender>
+  				<appender name="fileAppender" class="org.apache.log4j.RollingFileAppender">
+    					<param name="File" value="Logs/log4j.log"/>
+    					<layout class="org.apache.log4j.PatternLayout">
+    					<param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
+    					</layout>
+ 				 </appender>
+				  <root>
+   					<priority value ="debug"></priority>
+  					 <appender-ref ref="console"></appender-ref>
+   					 <appender-ref ref="fileAppender"></appender-ref>
+  				  </root>
+ 		
+				</log4j:configuration>
+
+-->Create Logs file at project level 
+->Add Log Class Log.java in utility package. that is  com.mystore.utility it will contain this as below
+		  package com.mystore.utility;
+
+		  import org.apache.logging.log4j.LogManager;
+		  import org.apache.logging.log4j.Logger;
+
+
+		 public class Log {
+	
+			// Initialize Log4j logs
+			public static Logger Log = LogManager.getLogger(Log.class.getName());
+
+
+			public static void startTestCase(String sTestCaseName){		  
+		 	Log.info("====================================="+sTestCaseName+" TEST START=========================================");
+		 }
+	
+		public static void endTestCase(String sTestCaseName){
+			Log.info("====================================="+sTestCaseName+" TEST END=========================================");
+		 }
+	
+		// Need to create below methods, so that they can be called  
+
+		 public static void info(String message) {
+
+			Log.info(message);
+
+			}
+
+	 	public static void warn(String message) {
+
+	    		Log.warn(message);
+
+		    	}
+
+	 	public static void error(String message) {
+
+	    		Log.error(message);
+
+			}
+
+	 	public static void fatal(String message) {
+
+	    		Log.fatal(message);
+
+		}
+
+	 	public static void debug(String message) {
+
+	    		Log.debug(message);
+
+		}
+	
+	}
+
+->Configure @BeforeSuite at BaseClass to configure  Log4j.xml
+
+   		import org.apache.log4j.xml.DOMConfigurator;
+		@BeforeSuite
+		public void beforSuite()
+			{
+		 	DOMConfigurator.configure("log4j.xml");
+			}
+	
+->Need to just call inside specific test cases methods in test cases from Log Class 
+	for example
+   		@Test
+		public void signInTest()
+		{
+		
+			Log.startTestCase("signInTest");
+			indexPage = new IndexPage();
+			signInPage = new SignInPage();
+		
+			Log.info("User will click on SignIn button");
+			signInPage = indexPage.clickOnSignIn();
+			Log.info("User will enter user name and password");
+			homePage = signInPage.signInMethod(prop.getProperty("username"),prop.getProperty("password"));
+		
+			// Add code to navigate back to the home page after login
+			//	    driver.get("https://magento.softwaretestingboard.com/");
+
+	    
+			String expectedHomeURL = "https://magento.softwaretestingboard.com/";
+			String actualHomeURL = homePage.getCurrentUrl();
+		
+			Log.info("Verifying if user is able to login");
+			System.out.println(actualHomeURL);
+			Assert.assertEquals(actualHomeURL, expectedHomeURL);
+			Log.info("Login success");
+			Log.endTestCase("signInTest");
+
+		}
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+*Data Driven Testing and  Data Provider
+=======================================
+->Add NewExcellLibrary.java  in com.mystore.utility package 
+->Create folder TestData inside src/test/resource and add excell file in that.
+->Create a package for DataProvider which is already created as com.mystore.dataprovider   and create DataProvider.java class there and create the object of NewExcelLibrary.java Class in that as below  and Add the data provider methods as below
+
+public class DataProviders {
+
+	NewExcelLibrary excellLibraryObj = new NewExcelLibrary();
+	
+	@DataProvider(name="<Dp name>")
+	public Object[][] getEmailData()
+	{
+		//Total rows count
+		int rows = excellLibraryObj.getRowCount("<WorkSheetName>");
+		//Total column count
+		int column = excellLibraryObj.getColumnCount("<WorkSheetName>");
+		int actRows = rows-1;
+		
+		
+		Object[][] data = new Object[actRows][column];
+		
+		for(int i=0;i<actRows;i++)
+		{
+			for(int j=0;j<column;j++)
+			{
+				data[i][j] = excellLibraryObj.getCellData("<WorkSheetName>", j, i+2);
+			}
+		}
+		return data;
+	}
+
+
+
+	
+}
+
+Example:
+
+	public class DataProviders {
+
+	NewExcelLibrary excellLibraryObj = new NewExcelLibrary();
+	
+	@DataProvider(name="credentials")
+	public Object[][] getCredentials()
+	{
+		//Total rows count
+		int rows = excellLibraryObj.getRowCount("Credentials");
+		//Total column count
+		int column = excellLibraryObj.getColumnCount("Credentials");
+		int actRows = rows-1;
+		
+		
+		Object[][] data = new Object[actRows][column];
+		
+		for(int i=0;i<actRows;i++)
+		{
+			for(int j=0;j<column;j++)
+			{
+				data[i][j] = excellLibraryObj.getCellData("Credentials", j, i+2);
+			}
+		}
+		return data;
+	}
+	
+	
+	@DataProvider(name="createAcntDetails")
+	public Object[][] getCreatAcntDetls()
+	{
+				//Total rows count
+				int rows = excellLibraryObj.getRowCount("CreateAccountDetails");
+				//Total column count
+				int column = excellLibraryObj.getColumnCount("CreateAccountDetails");
+				int actRows = rows-1;
+				
+				
+				Object[][] data = new Object[actRows][column];
+				
+				for(int i=0;i<actRows;i++)
+				{
+					for(int j=0;j<column;j++)
+					{
+						data[i][j] = excellLibraryObj.getCellData("CreateAccountDetails", j, i+2);
+					}
+				}
+				return data;
+	}
+	
+}
+
+
+
+->Call the data provider method from test scripts as below
+
+   @Test(dataProvider = "credentials",dataProviderClass=DataProviders.class)
+	public void signInTest(String uname,String password)
+	{
+		
+		Log.startTestCase("signInTest");
+		indexPage = new IndexPage();
+		signInPage = new SignInPage();
+		
+		Log.info("User will click on SignIn button");
+		signInPage = indexPage.clickOnSignIn();
+		Log.info("User will enter user name and password");
+		//homePage = signInPage.signInMethod(prop.getProperty("username"),prop.getProperty("password"));
+		homePage = signInPage.signInMethod(uname, password);
+		
+		
+		// Add code to navigate back to the home page after login
+		//	    driver.get("https://magento.softwaretestingboard.com/");
+
+	    
+		String expectedHomeURL = "https://magento.softwaretestingboard.com/";
+		String actualHomeURL = homePage.getCurrentUrl();
+		
+		Log.info("Verifying if user is able to login");
+		System.out.println(actualHomeURL);
+		Assert.assertEquals(actualHomeURL, expectedHomeURL);
+		Log.info("Login success");
+		Log.endTestCase("signInTest");
+	}
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+*Creation Of TestNg
+  ->Just right click on com.mystore.testcases-->testNg->Convert to TestNg
+  ->Right click on TestNg.xml file to run all test scripts.
+
+  ->To provide grouping using TestNg like smoke,sanity and regression we need to give (groups="Smoke")(groups="Sanity") (groups="Regression")  infront of @Test 		annotaion in specific test method  in different test script class where ever we want. And one more thing is in BaseClass infront of @BeforeSuite 
+	and @BeforeTest and in every Test script in front of @BeforeMethod and @AfterMethod as well we should give  (groups={"Smoke","Sanity","Regression"}) 
+  ->Then we can create different TestNg.xml file like TestNg_Smoke.xml ,TestNg_Sanity.xml,TestNg_Regression.xml like this
+  ->Then in for example in TestNg_Smoke.xml  we give like this below <test>
+		  <groups>
+  				<run>
+  					<include name="Smoke"></include>
+  				</run>
+ 		 </groups>
+	we should  do this remaining TestNg_Sanity.xml,TestNg_Regression.xml as well
+
+   ->To execute in different browser in BaseClass in launchApp() method we should comment this line
+		//		String browserName = prop.getProperty("browser");
+       and alter launchApp() method as launchApp(String browserName)..... Then in each TestScript  we write this 
+		@Parameters("browser")
+       and alter setup method as below
+		public void setup(String browser)
+		{
+			launchApp(browser);
+		}
+
+
+       and in TestNg.xml or some other TestNg.xml like TestNg_Sanity.xml,TestNg_Regression.xml we should give this tag below <test> tag as below
+
+	 			 <parameter name="browser" value="Chrome"></parameter>
+
+
+   ->cross browser testing we should creat new TestNg.xml file we can give name like crossBrowser.xml it will contain as below
+
+		<suite name="Cross_Browser">
+ 			 <test  name="Chrome_Test">
+	  			<parameter name="browser" value="Chrome"></parameter>
+	   
+	   			 <classes>   
+	     				 <class name="com.mystore.testcases.MyAccountPageTest"/>
+	    			</classes>
+ 			 </test> <!-- Test -->
+  
+   			<test  name="Firefox_Test">
+	  			<parameter name="browser" value="Firefox"></parameter>
+	   
+	    			<classes>   
+	      				<class name="com.mystore.testcases.MyAccountPageTest"/>
+	    			</classes>
+  			</test> <!-- Test -->
+  
+  
+   			<test  name="Ie_Test">
+	  			<parameter name="browser" value="IE"></parameter>
+	   
+	    			<classes>   
+	      				<class name="com.mystore.testcases.MyAccountPageTest"/>
+	    			</classes>
+  			</test> <!-- Test -->
+  
+  
+		</suite> <!-- Suite -->
+
+    ->for paralell execution we should give paralell="test" inside <suite> tag as below
+			<suite name="Cross_Browser" parallel='tests'>
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+*Extent Report
+================
+- Add/ Create extent-config.xml file for Extent report configuration.
+- Add/ Create ExtentManager Class in com.mystore.utility package-- to create the object of ExtentHtmlReporter and load extent-config.xml
+- Create  a folder or save extent report under test-output
+- Configure ExtentManager.setExtent() in@BeforeSuite method in BaseClass
+- Configure ExtentManager.setExtent() in@AfterSuite method in BaseClass
+  	 @AfterSuite
+	public void afterSuite()
+	{
+		ExtentManager.endReport();
+	}
+
+     and cut and paste code from loadconfig method to beforeSuite() and change name of beforeSuite() to loadConfig() as below
+	@BeforeSuite(groups={"Smoke","Sanity","Regression"}) 
+	public void loadConfig()
+	{
+		 ExtentManager.setExtent();
+		 DOMConfigurator.configure("log4j.xml");
+		 
+		 try
+			{
+				prop = new Properties();
+				System.out.println("super constructor is invoked");
+				FileInputStream ip = new FileInputStream(System.getProperty("user.dir")+"\\Configuration\\Config.properties");
+				prop.load(ip);
+				System.out.println("driver: "+ driver);
+			}
+			catch(FileNotFoundException e)
+			{
+				e.printStackTrace();
+			}
+			catch(IOException e)
+			{
+				e.printStackTrace();
+			}
+	}
+
+- Add/create screenshot method in Action/BaseClass  (we already have this method in Acion classs so no need to  create it)
+
+- To attach the screenshot in extent report 
+      -Add/Create a Listner class under com.mystore.utility  -- ListnerClass 
+      -To call the listner add the below listner(inside suite tag) setting in TestNg.xml
+		<listners>
+			<listner class-name="com.mystore.utility.ListnerClass"></listner>
+		</listners>
+	
+   now we can run TestNg.xml 
+  After execution we need to refresh our project so we will get ReportName.html under test-output->ExtententReport->ReportName.html
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+*GitHub
+===========
+
+
+
+
+*Links:  https://stackoverflow.com/questions/76932496/webdrivermanager-setup-failing-to-download-chromedriver-116
+	 
+git@github.com:PrasannaNaik211/MyStorePoject.git
+
+
+
